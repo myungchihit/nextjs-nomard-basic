@@ -1,12 +1,19 @@
 import { Suspense } from "react";
-import MovieInfo from "../../../../components/movie-info";
+import MovieInfo, { getMovie } from "../../../../components/movie-info";
 import MovieVideos from "../../../../components/movie-videos";
 
-export default async function MovieDetail({
-  params: { id },
-}: {
+interface IParams {
   params: { id: string };
-}) {
+}
+
+export async function generateMetadata({ params: { id } }: IParams) {
+  const movie = await getMovie(id);
+  return {
+    title: movie.title,
+  };
+}
+
+export default async function MovieDetailPage({ params: { id } }: IParams) {
   /*
   순차 실행이 아니라 병렬적으로 시행 시켜야하기 때문에 Promise.all()
   하지만 Promise.all은 movie데이터와 videoes 데이터가 둘 다 완료되어야 데이터를 가져오기 때문에
@@ -22,11 +29,9 @@ export default async function MovieDetail({
   // fallback을 props로 주면 await 완료 시 까지 로딩 컴포넌트 지정가능
   return (
     <div>
-      <h3>Movie Detail</h3>
       <Suspense fallback={<h1>Loading movie info</h1>}>
         <MovieInfo id={id} />
       </Suspense>
-      <h3>Videos</h3>
       <Suspense fallback={<h1>Loading movie videos</h1>}>
         <MovieVideos id={id} />
       </Suspense>
